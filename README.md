@@ -501,10 +501,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👤 Author
 
-**[Your Name]**
-- Portfolio: [your-portfolio-url]
-- LinkedIn: [your-linkedin]
-- Email: [your-email]
+**Marcos Morris**
+- Portfolio: https://marckmorris.github.io/
+- LinkedIn: https://www.linkedin.com/in/marck-morris/
+- Email: marck.morris.pro@gmail.com
 
 ---
 
