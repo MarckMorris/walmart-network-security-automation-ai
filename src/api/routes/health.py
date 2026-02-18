@@ -3,10 +3,12 @@ Health Check Routes
 System health monitoring endpoints
 """
 
-from fastapi import APIRouter
 from typing import Dict
 
+from fastapi import APIRouter
+
 router = APIRouter()
+
 
 @router.get("/health")
 async def health_check() -> Dict:
@@ -14,8 +16,9 @@ async def health_check() -> Dict:
     return {
         "status": "healthy",
         "service": "Network Security Automation",
-        "version": "1.0.0"
+        "version": "1.0.0",
     }
+
 
 @router.get("/health/detailed")
 async def detailed_health() -> Dict:
@@ -26,10 +29,7 @@ async def detailed_health() -> Dict:
             "database": "healthy",
             "ise_integration": "healthy",
             "dlp_integration": "healthy",
-            "ml_engine": "healthy"
+            "ml_engine": "healthy",
         },
-        "metrics": {
-            "uptime_seconds": 3600,
-            "requests_processed": 1000
-        }
+        "metrics": {"uptime_seconds": 3600, "requests_processed": 1000},
     }

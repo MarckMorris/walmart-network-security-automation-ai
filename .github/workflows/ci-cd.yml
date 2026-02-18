@@ -1,5 +1,15 @@
 name: CI/CD Pipeline
 
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: read
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
 on:
   push:
     branches: [ main, develop ]
