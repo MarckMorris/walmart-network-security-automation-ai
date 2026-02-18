@@ -1,0 +1,114 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: walmart-netsec-postgres
+    environment:
+      POSTGRES_DB: network_security_automation
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/database/migrations/001_init_schema.sql:/docker-entrypoint-initdb.d/001_init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d network_security_automation"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: walmart-netsec-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ise-simulator:
+    build:
+      context: .
+      dockerfile: Dockerfile.ise-simulator
+    container_name: walmart-netsec-ise-sim
+    ports:
+      - "9060:9060"
+
+  dlp-simulator:
+    build:
+      context: .
+      dockerfile: Dockerfile.dlp-simulator
+    container_name: walmart-netsec-dlp-sim
+    ports:
+      - "8080:8080"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: walmart-netsec-app
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - ENVIRONMENT=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=network_security_automation
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ISE_URL=http://ise-simulator:9060
+      - ISE_USERNAME=admin
+      - ISE_PASSWORD=admin
+      - DLP_URL=http://dlp-simulator:8080
+      - DLP_USERNAME=admin
+      - DLP_PASSWORD=admin
+    volumes:
+      - ./logs:/app/logs
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: walmart-netsec-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./dashboards/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: walmart-netsec-grafana
+    ports:
+      - "3000:3000"
+    environment:
+     - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_SECURITY_COOKIE_SAMESITE=none
+      - GF_SECURITY_COOKIE_SECURE=false
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./dashboards/grafana/provisioning:/etc/grafana/provisioning    
+    depends_on:
+      - prometheus
+
+volumes:
+  postgres_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  default:
+    name: walmart-netsec-network

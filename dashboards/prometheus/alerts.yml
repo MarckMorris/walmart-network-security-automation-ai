@@ -1,0 +1,30 @@
+groups:
+- name: network_security_alerts
+  interval: 30s
+  rules:
+  - alert: HighAnomalyRate
+    expr: rate(anomalies_detected_total[5m]) > 10
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High anomaly detection rate"
+      description: "Anomaly rate is {{ $value }} per minute"
+  
+  - alert: CriticalSecurityIncident
+    expr: security_incidents_total{severity="critical"} > 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Critical security incident detected"
+      description: "{{ $value }} critical incidents detected"
+  
+  - alert: MLModelInferenceLatency
+    expr: histogram_quantile(0.95, ml_inference_duration_seconds) > 0.5
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "ML inference latency high"
+      description: "95th percentile latency is {{ $value }}s"

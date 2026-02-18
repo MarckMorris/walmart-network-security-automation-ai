@@ -1,0 +1,14 @@
+# Example Terraform Variables File
+# Copy this to terraform.tfvars and update with your values
+
+environment  = "dev"
+location     = "eastus"
+aks_node_count = 3
+aks_node_size  = "Standard_D4s_v3"
+postgres_sku   = "GP_Standard_D4s_v3"
+enable_monitoring = true
+
+# Add your Azure AD admin group object IDs
+admin_group_object_ids = [
+  # "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+]

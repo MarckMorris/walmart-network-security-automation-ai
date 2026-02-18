@@ -1,0 +1,13 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Install Flask
+RUN pip install --no-cache-dir flask==3.0.0
+
+# Copy simulator code
+COPY src/simulators/dlp_simulator/server.py ./server.py
+
+EXPOSE 8080
+
+CMD ["python", "server.py"]

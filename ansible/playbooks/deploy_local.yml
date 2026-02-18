@@ -1,0 +1,51 @@
+---
+# Local Development Deployment Playbook
+# Phase 5: Ansible automation
+
+- name: Deploy Network Security Automation (Local)
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  
+  vars:
+    project_root: "{{ playbook_dir }}/../.."
+    docker_compose_file: "{{ project_root }}/docker-compose.yml"
+  
+  tasks:
+    - name: Ensure Docker is running
+      command: docker info
+      changed_when: false
+      
+    - name: Pull latest Docker images
+      command: docker compose -f {{ docker_compose_file }} pull
+      args:
+        chdir: "{{ project_root }}"
+      
+    - name: Start services with docker-compose
+      command: docker compose -f {{ docker_compose_file }} up -d
+      args:
+        chdir: "{{ project_root }}"
+      
+    - name: Wait for PostgreSQL to be ready
+      wait_for:
+        host: localhost
+        port: 5432
+        delay: 5
+        timeout: 60
+      
+    - name: Wait for application to be ready
+      wait_for:
+        host: localhost
+        port: 8000
+        delay: 10
+        timeout: 120
+      
+    - name: Display service status
+      command: docker compose -f {{ docker_compose_file }} ps
+      args:
+        chdir: "{{ project_root }}"
+      register: compose_status
+      
+    - name: Show status
+      debug:
+        var: compose_status.stdout_lines

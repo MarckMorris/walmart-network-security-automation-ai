@@ -1,0 +1,39 @@
+﻿# Core dependencies
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+pydantic==2.10.0
+python-dotenv==1.0.1
+
+# Database
+sqlalchemy==2.0.36
+psycopg2-binary==2.9.10
+alembic==1.14.0
+
+# Redis
+redis==5.2.0
+
+# HTTP clients
+requests==2.32.3
+httpx==0.28.0
+
+# ML/AI - VERSIONES CON WHEELS PARA LINUX Y WINDOWS
+numpy>=1.26.0,<2.0.0
+pandas==2.2.3
+scikit-learn>=1.5.0
+joblib==1.4.2
+
+# Monitoring and logging
+prometheus-client==0.21.0
+python-json-logger==4.0.0
+
+# Testing
+pytest==8.3.3
+pytest-asyncio==1.3.0
+pytest-cov==7.0.0
+
+# Utilities
+python-dateutil==2.9.0
+pytz==2024.2
+
+# Flask for simulators
+flask==3.0.3

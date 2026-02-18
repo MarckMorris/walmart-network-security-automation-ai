@@ -1,0 +1,64 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "walmart-netsec-overview",
+    "title": "Network Security Overview",
+    "tags": ["security", "network"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "panels": [
+      {
+        "id": 1,
+        "title": "Anomalies Detected (24h)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(anomalies_detected_total)",
+            "legendFormat": "Anomalies"
+          }
+        ],
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 6,
+          "h": 4
+        }
+      },
+      {
+        "id": 2,
+        "title": "Security Incidents by Severity",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum by (severity) (security_incidents_total)",
+            "legendFormat": "{{severity}}"
+          }
+        ],
+        "gridPos": {
+          "x": 6,
+          "y": 0,
+          "w": 6,
+          "h": 4
+        }
+      },
+      {
+        "id": 3,
+        "title": "Remediation Actions Over Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(remediation_actions_total[5m])",
+            "legendFormat": "Actions/min"
+          }
+        ],
+        "gridPos": {
+          "x": 0,
+          "y": 4,
+          "w": 12,
+          "h": 6
+        }
+      }
+    ]
+  }
+}

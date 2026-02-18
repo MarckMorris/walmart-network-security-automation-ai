@@ -1,0 +1,38 @@
+---
+# Production Deployment Playbook
+# Phase 5: Ansible automation for Azure AKS
+
+- name: Deploy to Azure AKS
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  
+  vars:
+    resource_group: "walmart-netsec-prod-rg"
+    aks_cluster: "walmart-netsec-prod-aks"
+    namespace: "walmart-netsec"
+  
+  tasks:
+    - name: Ensure Azure CLI is installed
+      command: az version
+      changed_when: false
+      
+    - name: Get AKS credentials
+      command: az aks get-credentials --resource-group {{ resource_group }} --name {{ aks_cluster }}
+      
+    - name: Create namespace
+      k8s:
+        name: "{{ namespace }}"
+        api_version: v1
+        kind: Namespace
+        state: present
+      
+    - name: Apply Kubernetes manifests
+      k8s:
+        state: present
+        src: "{{ item }}"
+      loop:
+        - "{{ playbook_dir }}/../../kubernetes/base/namespace.yaml"
+        - "{{ playbook_dir }}/../../kubernetes/base/configmap.yaml"
+        - "{{ playbook_dir }}/../../kubernetes/base/deployment.yaml"
+        - "{{ playbook_dir }}/../../kubernetes/base/service.yaml"

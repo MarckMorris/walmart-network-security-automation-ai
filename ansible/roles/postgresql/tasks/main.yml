@@ -1,0 +1,41 @@
+---
+# PostgreSQL Role Tasks
+# Phase 5: Database setup automation
+
+- name: Install PostgreSQL Python dependencies
+  pip:
+    name:
+      - psycopg2-binary
+    state: present
+
+- name: Ensure PostgreSQL is running
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
+  when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
+
+- name: Create database
+  postgresql_db:
+    name: network_security_automation
+    state: present
+  become: yes
+  become_user: postgres
+
+- name: Create database user
+  postgresql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    db: network_security_automation
+    priv: ALL
+    state: present
+  become: yes
+  become_user: postgres
+
+- name: Enable TimescaleDB extension
+  postgresql_ext:
+    name: timescaledb
+    db: network_security_automation
+    state: present
+  become: yes
+  become_user: postgres

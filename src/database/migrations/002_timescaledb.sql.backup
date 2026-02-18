@@ -1,0 +1,72 @@
+﻿-- TimescaleDB Configuration
+-- Phase 2: Enable time-series capabilities
+
+-- Enable TimescaleDB extension
+CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
+
+-- Convert network_events to hypertable
+ALTER TABLE network_events DROP CONSTRAINT network_events_pkey;
+ALTER TABLE network_events ADD PRIMARY KEY (id, timestamp);
+
+SELECT create_hypertable('network_events', 'timestamp',
+    chunk_time_interval => INTERVAL '1 day',
+    if_not_exists => TRUE
+);
+
+-- Convert ml_predictions to hypertable
+ALTER TABLE ml_predictions DROP CONSTRAINT ml_predictions_pkey;
+ALTER TABLE ml_predictions ADD PRIMARY KEY (id, prediction_timestamp);
+
+SELECT create_hypertable('ml_predictions', 'prediction_timestamp',
+    chunk_time_interval => INTERVAL '7 days',
+    if_not_exists => TRUE
+);
+
+-- Create continuous aggregate for network metrics
+CREATE MATERIALIZED VIEW network_metrics_hourly
+WITH (timescaledb.continuous) AS
+SELECT
+    time_bucket('1 hour', timestamp) AS bucket,
+    device_id,
+    location,
+    event_type,
+    COUNT(*) as event_count,
+    AVG(bytes_sent) as avg_bytes_sent,
+    AVG(bytes_received) as avg_bytes_received,
+    MAX(bytes_sent) as max_bytes_sent,
+    MAX(bytes_received) as max_bytes_received
+FROM network_events
+GROUP BY bucket, device_id, location, event_type;
+
+-- Add refresh policy
+SELECT add_continuous_aggregate_policy('network_metrics_hourly',
+    start_offset => INTERVAL '3 hours',
+    end_offset => INTERVAL '1 hour',
+    schedule_interval => INTERVAL '1 hour'
+);
+
+-- Create retention policy (keep raw data for 90 days)
+SELECT add_retention_policy('network_events', INTERVAL '90 days');
+SELECT add_retention_policy('ml_predictions', INTERVAL '180 days');
+
+-- Note: Compression policies removed - can be added later if needed
+-- Requires enabling columnstore first
+
+-- Create continuous aggregate for security metrics
+CREATE MATERIALIZED VIEW security_metrics_daily
+WITH (timescaledb.continuous) AS
+SELECT
+    time_bucket('1 day', created_at) AS day,
+    severity,
+    status,
+    COUNT(*) as incident_count,
+    AVG(confidence_score) as avg_confidence,
+    COUNT(*) FILTER (WHERE human_review_required = 1) as review_required_count
+FROM security_incidents
+GROUP BY day, severity, status;
+
+SELECT add_continuous_aggregate_policy('security_metrics_daily',
+    start_offset => INTERVAL '3 days',
+    end_offset => INTERVAL '1 day',
+    schedule_interval => INTERVAL '1 day'
+);

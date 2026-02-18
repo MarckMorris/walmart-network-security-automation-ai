@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Data
+*.csv
+*.joblib
+*.h5
+data/training/*
+data/models/*
+
+# Git
+.git/
+.gitignore
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+
+# Documentation
+docs/build/
