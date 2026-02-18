@@ -1,5 +1,6 @@
 ﻿from fastapi import Response
-from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
+from prometheus_client import (CONTENT_TYPE_LATEST, Counter, Histogram,
+                               generate_latest)
 
 # Definir métricas
 anomalies_detected = Counter("anomalies_detected_total", "Total anomalies detected")
